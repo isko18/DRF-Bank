@@ -1,17 +1,24 @@
 from rest_framework import serializers
-from apps.users.models import BankUser
 
-class UserSerializers(serializers.ModelSerializer):
+from .models import BankUser
+from apps.historytransfer.serializers import HistoryTransferSerializers
+
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankUser
-        fields = ('id', 'username', 'email', 'phone_number', 
-                  'created_at', 'age', 'balance')
+        fields = ('id','username', 'email', 'phone_number')
 
-# class UserDetailSerializers(serializers.ModelSerializer):
-#     from_user = 
+class UserDetailSerializer(serializers.ModelSerializer):
+    from_user = HistoryTransferSerializers(read_only=True, many=True)
+    class Meta:
+        model = BankUser
+        fields = ('id',  'username', 'email', 
+                  'phone_number', 'age', 'balance', 
+                  'wallet_address','created_at','from_user'
+                  )
 
 
-class RegisterUserSerializers(serializers.ModelSerializer):
+class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         max_length=255, write_only=True
     )
@@ -20,22 +27,22 @@ class RegisterUserSerializers(serializers.ModelSerializer):
     )
     class Meta:
         model = BankUser
-        fields = ('id', 'username', 'email', 'phone_number',
-                   'created_at', 'password', 'password2')
-        
-
+        fields = ('id',  'username', 'email', 
+                  'phone_number', 'age','created_at','password', 'password2'
+                  )
+    
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError ({'password2' : 'Пароли различаются'})
-        if '+996' not in attrs['phone_number']:
-            raise serializers.ValidationError('Номер телефона должна быть в формате +996xxxxxxxx')
+            raise serializers.ValidationError ({'password2': 'Пароли отличаются'})
+        if '+996' not in attrs['phone_number']:      
+            raise serializers.ValidationError('Номер телефона должен быть в формате +996XXXXXXXXX')
         return attrs
-    
+
     def create(self, values):
         user = BankUser.objects.create(
-            username = values['username'], phone_number = values['phone_number'], 
-            age = values['age'], email = values['email']
-        )
+            username=values['username'], phone_number=values['phone_number'],
+            age=values['age'], email=values['email'], 
+            )
         user.set_password(values['password'])
         user.save()
         return user
