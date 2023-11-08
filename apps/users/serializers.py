@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from apps.users.models import Users
+from apps.users.models import BankUser
 
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
-        model = Users
+        model = BankUser
         fields = ('id', 'username', 'email', 'phone_number', 
                   'created_at', 'age', 'balance')
 
@@ -13,13 +13,13 @@ class UserSerializers(serializers.ModelSerializer):
 
 class RegisterUserSerializers(serializers.ModelSerializer):
     password = serializers.CharField(
-        max_lenght = 255, write_only=True
+        max_length=255, write_only=True
     )
     password2 = serializers.CharField(
-        max_lenght = 255, write_only=True
+        max_length=255, write_only=True
     )
     class Meta:
-        model = Users
+        model = BankUser
         fields = ('id', 'username', 'email', 'phone_number',
                    'created_at', 'password', 'password2')
         
@@ -32,7 +32,7 @@ class RegisterUserSerializers(serializers.ModelSerializer):
         return attrs
     
     def create(self, values):
-        user = Users.objects.create(
+        user = BankUser.objects.create(
             username = values['username'], phone_number = values['phone_number'], 
             age = values['age'], email = values['email']
         )
